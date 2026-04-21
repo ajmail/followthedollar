@@ -548,9 +548,12 @@
 <body>
 
 <!-- API KEY MODAL -->
-<div class="modal-overlay" id="modal">
+<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
   <div class="modal">
-    <div class="modal-eyebrow">Follow The Dollar — AI Access</div>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+      <div class="modal-eyebrow" style="margin-bottom: 0;">Follow The Dollar — AI Access</div>
+      <button onclick="closeModal()" style="background: none; border: none; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 18px; cursor: pointer; line-height: 1; padding: 0 0 0 16px;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">✕</button>
+    </div>
     <div class="modal-title">Connect Your API Key</div>
     <p class="modal-desc">This demo uses the Anthropic API directly from your browser. Your key is stored only in memory for this session — never logged or transmitted to our servers.</p>
     <input class="modal-input" type="password" id="api-key-input" placeholder="sk-ant-..." />
@@ -772,6 +775,14 @@ window.onload = () => {
     input.style.height = Math.min(input.scrollHeight, 120) + 'px';
   });
 };
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
 
 function submitKey() {
   const key = document.getElementById('api-key-input').value.trim();
