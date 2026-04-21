@@ -95,4 +95,4 @@ Commercial data API: **Nomos** — contact for access.
 **Ajmail Matin**
 Founder, Pittsburgh Compact
 followthedollar.org
-pittsburghcompact.org
+ajmail.github.io/pittsburgh-compact/
