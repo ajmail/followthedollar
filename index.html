@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Follow The Dollar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f2eb;
+    --red: #e8341a;
+    --dim: #2a2a2a;
+    --mid: #444;
+    --muted: #888;
+    --card: #141414;
+    --border: #222;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 48px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .nav-logo span { color: var(--red); }
+
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--white); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 48px 80px 48px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 8vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero-headline .accent { color: var(--red); }
+
+  .hero-sub {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .btn-primary:hover { background: #c9291a; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--white); border-color: var(--muted); }
+
+  /* HERO RIGHT — BIG NUMBER */
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 48px;
+    border-left: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .big-number-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.5s;
+  }
+
+  .big-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(120px, 18vw, 220px);
+    line-height: 1;
+    color: var(--red);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.7s;
+    position: relative;
+  }
+
+  .big-number-unit {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    color: var(--dim);
+    display: block;
+    margin-top: -8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.9s;
+  }
+
+  .big-number-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 320px;
+    margin-top: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.1s;
+  }
+
+  .hero-right::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(232,52,26,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* TICKER */
+  .ticker-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--dim);
+    overflow: hidden;
+    padding: 12px 0;
+    position: relative;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 80px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .ticker-item .ratio {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .ticker-item .ratio.good { color: #4ade80; }
+  .ticker-item .ratio.bad { color: var(--red); }
+
+  .ticker-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 50%;
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* SECTION HEADER */
+  .section-header {
+    padding: 0 48px;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    color: var(--white);
+    letter-spacing: 0.02em;
+  }
+
+  /* ORG CARDS */
+  .orgs-section {
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+  }
+
+  .orgs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  .org-card {
+    background: var(--card);
+    padding: 32px;
+    transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .org-card:hover { background: #1a1a1a; }
+
+  .org-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--red);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s ease;
+  }
+
+  .org-card:hover::before { transform: scaleY(1); }
+
+  .org-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .org-name {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .org-location {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .org-ratio-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .org-ratio-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+  }
+
+  .org-ratio-number.critical { color: var(--red); }
+  .org-ratio-number.poor { color: #f97316; }
+  .org-ratio-number.fair { color: #eab308; }
+  .org-ratio-number.good { color: #4ade80; }
+
+  .org-ratio-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 8px;
+  }
+
+  .ratio-bar {
+    height: 3px;
+    background: var(--dim);
+    width: 100%;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .ratio-fill {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 1s ease;
+  }
+
+  .ratio-fill.critical { background: var(--red); }
+  .ratio-fill.poor { background: #f97316; }
+  .ratio-fill.fair { background: #eab308; }
+  .ratio-fill.good { background: #4ade80; }
+
+  .org-meta {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .org-meta-item { }
+
+  .org-meta-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .org-meta-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* SEARCH */
+  .search-section {
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+    background: var(--dim);
+  }
+
+  .search-bar {
+    display: flex;
+    gap: 0;
+    margin-top: 48px;
+    border: 1px solid var(--border);
+    max-width: 800px;
+  }
+
+  .search-input {
+    flex: 1;
+    background: var(--black);
+    border: none;
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--white);
+    outline: none;
+  }
+
+  .search-input::placeholder { color: var(--muted); }
+
+  .search-btn {
+    background: var(--red);
+    border: none;
+    padding: 20px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .search-btn:hover { background: #c9291a; }
+
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* MAP SECTION */
+  .map-section {
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+  }
+
+  .map-placeholder {
+    margin-top: 48px;
+    height: 480px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .map-us {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+  }
+
+  .map-legend {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(10,10,10,0.9);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+
+  .legend-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .legend-swatch {
+    width: 24px;
+    height: 3px;
+  }
+
+  .legend-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* METHODOLOGY */
+  .method-section {
+    padding: 100px 48px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+
+  .method-left { }
+
+  .method-formula {
+    margin-top: 48px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 40px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .formula-line {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .formula-main {
+    font-size: 22px;
+    color: var(--white);
+    margin: 20px 0;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    line-height: 1.6;
+  }
+
+  .formula-main .highlight { color: var(--red); }
+
+  .formula-source {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+
+  .method-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .method-steps { margin-top: 32px; }
+
+  .method-step {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .method-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--dim);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 48px;
+  }
+
+  .step-content { }
+
+  .step-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* NOMOS BAND */
+  .nomos-band {
+    padding: 80px 48px;
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+
+  .nomos-left { }
+
+  .nomos-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+  }
+
+  .nomos-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    color: var(--white);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .nomos-desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+
+  .btn-white {
+    background: var(--white);
+    color: var(--red);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-white:hover { opacity: 0.9; }
+
+  /* FOOTER */
+  footer {
+    padding: 48px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .footer-logo span { color: var(--red); }
+
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* STAT ROW */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat-cell {
+    padding: 48px;
+    border-right: 1px solid var(--border);
+  }
+
+  .stat-cell:last-child { border-right: none; }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 5vw, 72px);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-value .red { color: var(--red); }
+
+  .stat-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* SVG MAP STATES */
+  .state { fill: #1e1e1e; stroke: #111; stroke-width: 0.5; transition: fill 0.3s; }
+  .state:hover { fill: #333; }
+  .state.critical { fill: rgba(232,52,26,0.7); }
+  .state.poor { fill: rgba(249,115,22,0.6); }
+  .state.fair { fill: rgba(234,179,8,0.5); }
+  .state.good { fill: rgba(74,222,128,0.5); }
+
+  /* WAITLIST */
+  .waitlist-section {
+    padding: 80px 48px;
+    border-top: 1px solid var(--border);
+    background: var(--dim);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .waitlist-left { }
+
+  .waitlist-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .waitlist-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 52px);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .waitlist-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 380px;
+  }
+
+  .waitlist-right { }
+
+  .waitlist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .waitlist-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+
+  .waitlist-input {
+    flex: 1;
+    background: var(--black);
+    border: none;
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    outline: none;
+  }
+
+  .waitlist-input::placeholder { color: var(--muted); }
+
+  .waitlist-select {
+    flex: 1;
+    background: var(--black);
+    border: none;
+    border-left: 1px solid var(--border);
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .waitlist-select option { background: var(--black); }
+
+  .waitlist-btn {
+    background: var(--red);
+    border: none;
+    padding: 18px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+  }
+
+  .waitlist-btn:hover { background: #c9291a; }
+
+  .waitlist-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .waitlist-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .waitlist-count-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--red);
+    line-height: 1;
+  }
+
+  .waitlist-count-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .waitlist-success {
+    display: none;
+    padding: 20px;
+    border: 1px solid var(--red);
+    background: rgba(232,52,26,0.06);
+  }
+
+  .waitlist-success-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .waitlist-success-text span { color: var(--red); }
+
+  @media (max-width: 768px) {
+    .waitlist-section { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px; }
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { border-left: none; border-top: 1px solid var(--border); }
+    .orgs-section, .search-section, .map-section, .method-section, .nomos-band, footer { padding: 60px 24px; }
+    .method-section { grid-template-columns: 1fr; gap: 40px; }
+    .stat-row { grid-template-columns: 1fr; }
+    .stat-cell { border-right: none; border-bottom: 1px solid var(--border); }
+    .section-header { padding: 0 24px; flex-direction: column; gap: 8px; }
+    .nomos-band { flex-direction: column; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+    .footer-note { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Follow<span>The</span>Dollar</div>
+  <ul class="nav-links">
+    <li><a href="#database">Database</a></li>
+    <li><a href="#map">Map</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#nomos">API Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Transparency Infrastructure</div>
+    <h1 class="hero-headline">Where Does<br>The <span class="accent">Money</span><br>Actually Go?</h1>
+    <p class="hero-sub">Follow The Dollar tracks how much of every taxpayer dollar reaches the people it was appropriated to serve — across nonprofits, intermediaries, and public programs nationwide.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Search Any Organization</button>
+      <button class="btn-ghost">View Methodology</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="big-number-label">National median — Direct Capital Ratio</div>
+    <div class="big-number">31<span class="big-number-unit">¢ per dollar</span></div>
+    <p class="big-number-desc">Across the 200 largest publicly-funded nonprofits in America, the median recipient receives 31 cents of every dollar appropriated in their name. Source: IRS Form 990 + Federal Audit Clearinghouse.</p>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span>Innovation Works — PA</span><span class="ratio bad">25¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Feeding America</span><span class="ratio bad">38¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">54¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>JumpStart — OH</span><span class="ratio bad">21¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Natl Alliance to End Homelessness</span><span class="ratio bad">29¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>BFTP Southeast — PA</span><span class="ratio bad">28¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Innovation Works — PA</span><span class="ratio bad">25¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Feeding America</span><span class="ratio bad">38¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">54¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>JumpStart — OH</span><span class="ratio bad">21¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Natl Alliance to End Homelessness</span><span class="ratio bad">29¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>BFTP Southeast — PA</span><span class="ratio bad">28¢</span><span class="ticker-dot"></span></div>
+  </div>
+</div>
+
+<!-- STAT ROW -->
+<div class="stat-row">
+  <div class="stat-cell reveal">
+    <div class="stat-value"><span class="red">$2.3T</span></div>
+    <div class="stat-desc">Annual public funding flowing through<br>nonprofit intermediaries in the US</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-value">31<span class="red">¢</span></div>
+    <div class="stat-desc">Median cents per dollar reaching<br>intended recipients</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-value"><span class="red">1.8M</span></div>
+    <div class="stat-desc">Nonprofit 990 filings analyzed<br>via IRS public dataset</div>
+  </div>
+</div>
+
+<!-- DATABASE -->
+<section class="orgs-section" id="database">
+  <div class="section-header reveal">
+    <span class="section-label">Database</span>
+    <h2 class="section-title">Organization Profiles</h2>
+  </div>
+
+  <div class="orgs-grid">
+
+    <!-- Card 1 -->
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Pennsylvania</div>
+      <div class="org-name">Innovation Works</div>
+      <div class="org-location">Pittsburgh, PA</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">25¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:25%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$576K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">$2.9M</div>
+          <div class="org-meta-key">Top-10 Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Indiana</div>
+      <div class="org-name">Elevate Ventures</div>
+      <div class="org-location">Indianapolis, IN</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number good">54¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill good" style="width:54%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">—</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">IN</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Ohio</div>
+      <div class="org-name">JumpStart</div>
+      <div class="org-location">Cleveland, OH</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">21¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:21%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">—</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">OH</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="org-card reveal">
+      <div class="org-category">Food Security — National</div>
+      <div class="org-name">Feeding America</div>
+      <div class="org-location">Chicago, IL</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number poor">38¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill poor" style="width:38%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$1.1M</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">$3.5B</div>
+          <div class="org-meta-key">Revenue</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="org-card reveal">
+      <div class="org-category">Homelessness — National</div>
+      <div class="org-name">Natl Alliance to End Homelessness</div>
+      <div class="org-location">Washington, DC</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">29¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:29%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$313K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">DC</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2022</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6 — placeholder -->
+    <div class="org-card reveal" style="display:flex;align-items:center;justify-content:center;min-height:280px;">
+      <div style="text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--dim);margin-bottom:12px;">+1,847</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);">More organizations<br>in the database</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEARCH -->
+<section class="search-section" id="search">
+  <div class="section-header reveal">
+    <span class="section-label">Search</span>
+    <h2 class="section-title">Find Any Organization</h2>
+  </div>
+  <div class="search-bar reveal">
+    <input class="search-input" type="text" placeholder="Search by name, EIN, state, or category...">
+    <button class="search-btn">Search</button>
+  </div>
+  <div class="filter-row reveal">
+    <button class="filter-chip active">All</button>
+    <button class="filter-chip">Innovation Funding</button>
+    <button class="filter-chip">Food Security</button>
+    <button class="filter-chip">Homelessness</button>
+    <button class="filter-chip">Workforce Dev</button>
+    <button class="filter-chip">Healthcare Access</button>
+    <button class="filter-chip">Pennsylvania</button>
+    <button class="filter-chip">DCR &lt; 30¢</button>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="map-section" id="map">
+  <div class="section-header reveal">
+    <span class="section-label">Geography</span>
+    <h2 class="section-title">State-Level Performance</h2>
+  </div>
+  <div class="map-placeholder reveal">
+    <svg class="map-us" viewBox="0 0 960 600" xmlns="http://www.w3.org/2000/svg">
+      <!-- Simplified US state shapes for illustration -->
+      <!-- Northeast cluster -->
+      <rect class="state critical" x="860" y="80" width="30" height="25" rx="1"/>
+      <rect class="state poor" x="840" y="105" width="35" height="25" rx="1"/>
+      <rect class="state fair" x="855" y="130" width="40" height="30" rx="1"/>
+      <rect class="state critical" x="840" y="160" width="55" height="35" rx="1"/>
+      <rect class="state poor" x="820" y="195" width="45" height="30" rx="1"/>
+      <!-- Mid-Atlantic -->
+      <rect class="state critical" x="810" y="160" width="30" height="35" rx="1"/>
+      <rect class="state poor" x="790" y="170" width="22" height="30" rx="1"/>
+      <!-- Southeast -->
+      <rect class="state critical" x="700" y="280" width="80" height="70" rx="1"/>
+      <rect class="state poor" x="660" y="260" width="45" height="90" rx="1"/>
+      <rect class="state critical" x="620" y="240" width="45" height="80" rx="1"/>
+      <rect class="state fair" x="580" y="230" width="45" height="70" rx="1"/>
+      <rect class="state poor" x="700" y="350" width="80" height="80" rx="1"/>
+      <!-- Midwest -->
+      <rect class="state poor" x="540" y="160" width="70" height="70" rx="1"/>
+      <rect class="state critical" x="600" y="150" width="65" height="80" rx="1"/>
+      <rect class="state fair" x="660" y="140" width="70" height="80" rx="1"/>
+      <rect class="state poor" x="720" y="160" width="65" height="75" rx="1"/>
+      <rect class="state good" x="460" y="170" width="85" height="75" rx="1"/>
+      <!-- PA highlighted -->
+      <rect class="state critical" x="780" y="155" width="60" height="45" rx="1" stroke="#e8341a" stroke-width="2"/>
+      <!-- Plains -->
+      <rect class="state fair" x="370" y="150" width="95" height="90" rx="1"/>
+      <rect class="state fair" x="280" y="150" width="95" height="85" rx="1"/>
+      <rect class="state poor" x="370" y="240" width="95" height="85" rx="1"/>
+      <rect class="state fair" x="280" y="235" width="95" height="90" rx="1"/>
+      <!-- Mountain -->
+      <rect class="state fair" x="200" y="130" width="85" height="90" rx="1"/>
+      <rect class="state good" x="120" y="120" width="85" height="95" rx="1"/>
+      <rect class="state fair" x="200" y="220" width="85" height="85" rx="1"/>
+      <rect class="state good" x="120" y="215" width="85" height="90" rx="1"/>
+      <!-- West Coast -->
+      <rect class="state good" x="40" y="100" width="85" height="130" rx="1"/>
+      <rect class="state fair" x="40" y="230" width="85" height="70" rx="1"/>
+      <rect class="state good" x="40" y="300" width="85" height="80" rx="1"/>
+      <!-- Texas -->
+      <rect class="state poor" x="370" y="325" width="130" height="110" rx="1"/>
+      <!-- Florida -->
+      <rect class="state critical" x="720" y="390" width="60" height="100" rx="1"/>
+      <!-- Alaska/Hawaii placeholders -->
+      <rect class="state good" x="60" y="480" width="80" height="60" rx="1"/>
+      <rect class="state fair" x="200" y="500" width="60" height="40" rx="1"/>
+
+      <!-- State label for PA -->
+      <text x="810" y="182" fill="#e8341a" font-family="monospace" font-size="9" font-weight="bold">PA</text>
+      <text x="810" y="192" fill="#888" font-family="monospace" font-size="8">25¢</text>
+    </svg>
+
+    <div class="map-legend">
+      <div class="legend-title">Direct Capital Ratio</div>
+      <div class="legend-row"><div class="legend-swatch" style="background:#4ade80"></div><div class="legend-label">50¢+ Strong</div></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:#eab308"></div><div class="legend-label">35–50¢ Fair</div></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:#f97316"></div><div class="legend-label">20–35¢ Poor</div></div>
+      <div class="legend-row"><div class="legend-swatch" style="background:#e8341a"></div><div class="legend-label">&lt;20¢ Critical</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- METHODOLOGY -->
+<section class="method-section" id="methodology">
+  <div class="method-left reveal">
+    <div class="section-label">Methodology</div>
+    <h2 class="section-title" style="font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4vw,56px);margin-top:8px;">The Direct Capital Ratio</h2>
+    <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-top:20px;">Developed from forensic analysis of Pennsylvania's innovation funding ecosystem. Every figure traces to a primary audited source — no estimates, no projections.</p>
+
+    <div class="method-formula">
+      <div class="formula-line">DCR =</div>
+      <div class="formula-main">
+        <span class="highlight">Direct Disbursements to Recipients</span><br>
+        ────────────────────────────<br>
+        Total State Appropriations Received
+      </div>
+      <div class="formula-source">
+        Sources: IRS Form 990 Schedule I · Federal Audit Clearinghouse single audits · State budget documents · SAM.gov
+      </div>
+    </div>
+  </div>
+
+  <div class="method-right reveal">
+    <div class="section-label">How It Works</div>
+    <div class="method-steps">
+      <div class="method-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">Pull state appropriations</div>
+          <div class="step-desc">Total public dollars received by the organization from state budget documents and federal audit clearinghouse single audits.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">Identify direct disbursements</div>
+          <div class="step-desc">Grants and direct capital flowing to intended recipients, sourced from IRS Form 990 Schedule I filings on ProPublica Nonprofit Explorer.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">Calculate the ratio</div>
+          <div class="step-desc">Divide disbursements by appropriations. The result is how many cents of every public dollar actually reached the intended recipient.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">Cross-reference exec comp</div>
+          <div class="step-desc">Layer in Schedule J compensation data to show the relationship between overhead absorption and leadership pay.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist-section" id="waitlist">
+  <div class="waitlist-left reveal">
+    <div class="waitlist-eyebrow">Early Access</div>
+    <h2 class="waitlist-headline">Get Notified When Your State Goes Live</h2>
+    <p class="waitlist-sub">We're expanding the Direct Capital Ratio database state by state. Join the waitlist to be notified when your state's organizations are published — and to request API access via Nomos.</p>
+    <div class="waitlist-count">
+      <div class="waitlist-count-num" id="waitlist-counter">0</div>
+      <div class="waitlist-count-label">researchers, journalists<br>& policy teams on the list</div>
+    </div>
+  </div>
+  <div class="waitlist-right reveal">
+    <div class="waitlist-form" id="waitlist-form">
+      <div class="waitlist-row">
+        <input class="waitlist-input" type="email" placeholder="your@email.com" id="waitlist-email">
+      </div>
+      <div class="waitlist-row">
+        <select class="waitlist-select" id="waitlist-role">
+          <option value="" disabled selected>I am a...</option>
+          <option value="researcher">Researcher / Academic</option>
+          <option value="journalist">Journalist / Reporter</option>
+          <option value="policy">Policy Maker / Government</option>
+          <option value="founder">Founder / Entrepreneur</option>
+          <option value="investor">Investor / Funder</option>
+          <option value="advocate">Advocate / Nonprofit</option>
+          <option value="developer">Developer / Engineer</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="waitlist-select" id="waitlist-state" style="border-left: 1px solid var(--border);">
+          <option value="" disabled selected>My state...</option>
+          <option>Pennsylvania</option><option>Ohio</option><option>Indiana</option>
+          <option>New York</option><option>California</option><option>Texas</option>
+          <option>Illinois</option><option>Michigan</option><option>Massachusetts</option>
+          <option>Washington</option><option>National / All States</option><option>Other</option>
+        </select>
+      </div>
+      <button class="waitlist-btn" onclick="submitWaitlist()">Join the Waitlist</button>
+      <div class="waitlist-note">No spam. Notified only when your state's data is published or when API access opens. Unsubscribe anytime.</div>
+    </div>
+    <div class="waitlist-success" id="waitlist-success">
+      <div class="waitlist-success-text">You're on the list. We'll notify you when <span id="success-state">your state</span> goes live — and when Nomos API access opens.<br><br>In the meantime, the methodology and current dataset are open at <span>followthedollar.org</span>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- NOMOS BAND -->
+<div class="nomos-band" id="nomos">
+  <div class="nomos-left">
+    <div class="nomos-eyebrow">Powered by Nomos</div>
+    <div class="nomos-headline">The Commercial<br>Data Layer</div>
+    <p class="nomos-desc">Nomos provides API access to the full Direct Capital Ratio dataset — enabling researchers, journalists, policymakers, and oversight bodies to query, analyze, and monitor public dollar efficiency at scale.</p>
+  </div>
+  <button class="btn-white">Request API Access</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Follow<span>The</span>Dollar</div>
+  <div class="footer-note">
+    All data sourced from IRS Form 990 public filings, Federal Audit Clearinghouse,<br>
+    and state budget documents. Methodology available on request.<br>
+    A Pittsburgh Compact initiative. Commercial API by Nomos.
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Filter chips
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  // Animate ratio bars on scroll
+  const bars = document.querySelectorAll('.ratio-fill');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.width = entry.target.style.width;
+      }
+    });
+  }, { threshold: 0.3 });
+  bars.forEach(bar => {
+    const target = bar.style.width;
+    bar.style.width = '0%';
+    barObserver.observe(bar);
+    setTimeout(() => { bar.style.width = target; }, 300);
+  });
+
+  // Waitlist counter animation
+  const TARGET_COUNT = 47;
+  const counterEl = document.getElementById('waitlist-counter');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        let count = 0;
+        const step = Math.ceil(TARGET_COUNT / 40);
+        const interval = setInterval(() => {
+          count = Math.min(count + step, TARGET_COUNT);
+          counterEl.textContent = count;
+          if (count >= TARGET_COUNT) clearInterval(interval);
+        }, 40);
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  counterObserver.observe(counterEl);
+
+  // Waitlist form submission — wired to Formspree
+  async function submitWaitlist() {
+    const email = document.getElementById('waitlist-email').value.trim();
+    const role = document.getElementById('waitlist-role').value;
+    const state = document.getElementById('waitlist-state').value;
+    const btn = document.querySelector('.waitlist-btn');
+
+    if (!email || !email.includes('@')) {
+      document.getElementById('waitlist-email').style.outline = '1px solid var(--red)';
+      document.getElementById('waitlist-email').focus();
+      return;
+    }
+
+    // Loading state
+    btn.textContent = 'Submitting...';
+    btn.style.opacity = '0.7';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('https://formspree.io/f/xaqapqdn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          email,
+          role: role || 'Not specified',
+          state: state || 'Not specified',
+          source: 'followthedollar.org waitlist'
+        })
+      });
+
+      if (res.ok) {
+        const stateLabel = state || 'your state';
+        document.getElementById('success-state').textContent = stateLabel;
+        document.getElementById('waitlist-form').style.display = 'none';
+        document.getElementById('waitlist-success').style.display = 'block';
+        // Bump counter visually
+        counterEl.textContent = parseInt(counterEl.textContent) + 1;
+      } else {
+        btn.textContent = 'Try Again';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      btn.textContent = 'Try Again';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+    }
+  }
+
+  // Allow enter key on email input
+  document.getElementById('waitlist-email').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitWaitlist();
+  });
+</script>
+
+</body>
+</html>

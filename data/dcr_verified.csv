@@ -1,0 +1,6 @@
+organization,location,state,sector,dcr_cents,dcr_ratio,ceo_total_comp,ceo_base,ceo_bonus,top10_total_comp,source_year,source_990,source_audit,notes
+Innovation Works,Pittsburgh,PA,Innovation Funding,25,0.25,576383,396357,128375,2937310,FY2023,IRS Form 990 Schedule J ProPublica,Federal Audit Clearinghouse,Anchor dataset. Schedule J compensation data verified from photographed 990 filing.
+JumpStart,Cleveland,OH,Innovation Funding,21,0.21,,,,,FY2023,IRS Form 990 Schedule I ProPublica,Federal Audit Clearinghouse,Executive compensation not yet pulled. DCR from empirical paper dataset.
+Elevate Ventures,Indianapolis,IN,Innovation Funding,54,0.54,,,,,FY2023,IRS Form 990 Schedule I ProPublica,Federal Audit Clearinghouse,Benchmark performer. DCR from empirical paper dataset.
+Feeding America,Chicago,IL,Food Security,38,0.38,1113502,949866,,,,FY2023,IRS Form 990 ProPublica,,"CEO total comp $1,113,502 per most recent 990 filing."
+National Alliance to End Homelessness,Washington,DC,Homelessness,29,0.29,313000,,,,,FY2022,IRS Form 990 ProPublica,,CEO Nan Roman per InfluenceWatch citing 990.
