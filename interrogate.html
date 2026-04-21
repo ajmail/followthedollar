@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interrogate the Data — Follow The Dollar</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #141414;
+    --dim: #1e1e1e;
+    --mid: #2a2a2a;
+    --border: #2f2f2f;
+    --muted: #666;
+    --light: #999;
+    --white: #f5f2eb;
+    --red: #e8341a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-weight: 400;
+    overflow-x: hidden;
+    cursor: crosshair;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.3;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    flex-shrink: 0;
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--red); }
+
+  .nav-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--red);
+    border: 1px solid var(--red);
+    padding: 4px 10px;
+  }
+
+  /* MAIN LAYOUT */
+  .app {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-title {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 12px;
+  }
+
+  .sidebar-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .org-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+
+  .org-list::-webkit-scrollbar { width: 3px; }
+  .org-list::-webkit-scrollbar-track { background: var(--black); }
+  .org-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .org-item {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .org-item:hover { background: var(--dim); }
+
+  .org-item-name {
+    font-size: 12px;
+    color: var(--white);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .org-item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .org-item-location {
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .org-item-dcr {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .org-item-dcr.critical { color: var(--red); }
+  .org-item-dcr.poor { color: #f97316; }
+  .org-item-dcr.good { color: #4ade80; }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* SUGGESTED QUERIES */
+  .suggested {
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .suggested-title {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .suggested-chip {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--dim);
+    border: 1px solid var(--border);
+    color: var(--light);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+
+  .suggested-chip:hover {
+    border-color: var(--red);
+    color: var(--white);
+  }
+
+  /* CHAT AREA */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .chat-header-left { }
+
+  .chat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .chat-subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .data-badge {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  .data-badge span { color: var(--red); }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .messages::-webkit-scrollbar { width: 3px; }
+  .messages::-webkit-scrollbar-track { background: var(--black); }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); }
+
+  /* WELCOME STATE */
+  .welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .welcome-icon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: var(--dim);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .welcome-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .welcome-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 400px;
+  }
+
+  .welcome-sub strong { color: var(--red); }
+
+  /* MESSAGE BUBBLES */
+  .message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: msgIn 0.3s ease;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user { align-self: flex-end; align-items: flex-end; }
+  .message.assistant { align-self: flex-start; align-items: flex-start; }
+
+  .message-label {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .message.user .message-label { color: var(--red); }
+
+  .message-bubble {
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .message.user .message-bubble {
+    background: var(--dim);
+    border-color: var(--mid);
+    color: var(--white);
+  }
+
+  .message.assistant .message-bubble {
+    background: var(--dark);
+    border-color: var(--border);
+    color: var(--white);
+    border-left: 3px solid var(--red);
+  }
+
+  .message.assistant .message-bubble strong {
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  .message.assistant .message-bubble code {
+    background: var(--mid);
+    padding: 1px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--light);
+  }
+
+  /* TYPING INDICATOR */
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    width: fit-content;
+  }
+
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: typing 1.2s ease-in-out infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.2; transform: scale(0.8); }
+    30% { opacity: 1; transform: scale(1); }
+  }
+
+  /* SOURCE TAG */
+  .source-tag {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 6px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--black);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+
+  .input-row:focus-within { border-color: var(--red); }
+
+  .chat-input {
+    flex: 1;
+    background: var(--dark);
+    border: none;
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    outline: none;
+    resize: none;
+    min-height: 52px;
+    max-height: 120px;
+  }
+
+  .chat-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    background: var(--red);
+    border: none;
+    padding: 16px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+    align-self: flex-end;
+    height: 52px;
+  }
+
+  .send-btn:hover { background: #c9291a; }
+  .send-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+  .input-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .input-meta span { color: var(--red); }
+
+  /* API KEY MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    padding: 40px;
+    max-width: 480px;
+    width: 90%;
+  }
+
+  .modal-eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .modal-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+
+  .modal-input {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--border);
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    outline: none;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .modal-input:focus { border-color: var(--red); }
+  .modal-input::placeholder { color: var(--muted); }
+
+  .modal-btn {
+    width: 100%;
+    background: var(--red);
+    border: none;
+    padding: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .modal-btn:hover { background: #c9291a; }
+
+  .modal-note {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    nav { padding: 12px 16px; }
+    .chat-header { padding: 16px; }
+    .messages { padding: 16px; }
+    .input-area { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-eyebrow">Follow The Dollar — AI Access</div>
+    <div class="modal-title">Connect Your API Key</div>
+    <p class="modal-desc">This demo uses the Anthropic API directly from your browser. Your key is stored only in memory for this session — never logged or transmitted to our servers.</p>
+    <input class="modal-input" type="password" id="api-key-input" placeholder="sk-ant-..." />
+    <button class="modal-btn" onclick="submitKey()">Connect & Interrogate</button>
+    <p class="modal-note">Don't have a key? Get one at console.anthropic.com — takes 2 minutes. This is the Nomos BYOAI demo — production will use our managed API layer.</p>
+  </div>
+</div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Follow<span>The</span>Dollar</a>
+  <div class="nav-badge">AI Interrogation — Beta</div>
+</nav>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Verified Dataset</div>
+      <div class="sidebar-desc">5 organizations. All figures from IRS Form 990, Federal Audit Clearinghouse, and state budget documents.</div>
+    </div>
+
+    <div class="org-list">
+      <div class="org-item" onclick="askAbout('Innovation Works')">
+        <div class="org-item-name">Innovation Works</div>
+        <div class="org-item-meta">
+          <span class="org-item-location">Pittsburgh, PA — Innovation</span>
+          <span class="org-item-dcr critical">25¢</span>
+        </div>
+      </div>
+      <div class="org-item" onclick="askAbout('JumpStart')">
+        <div class="org-item-name">JumpStart</div>
+        <div class="org-item-meta">
+          <span class="org-item-location">Cleveland, OH — Innovation</span>
+          <span class="org-item-dcr critical">21¢</span>
+        </div>
+      </div>
+      <div class="org-item" onclick="askAbout('Elevate Ventures')">
+        <div class="org-item-name">Elevate Ventures</div>
+        <div class="org-item-meta">
+          <span class="org-item-location">Indianapolis, IN — Innovation</span>
+          <span class="org-item-dcr good">54¢</span>
+        </div>
+      </div>
+      <div class="org-item" onclick="askAbout('Feeding America')">
+        <div class="org-item-name">Feeding America</div>
+        <div class="org-item-meta">
+          <span class="org-item-location">Chicago, IL — Food Security</span>
+          <span class="org-item-dcr poor">38¢</span>
+        </div>
+      </div>
+      <div class="org-item" onclick="askAbout('National Alliance to End Homelessness')">
+        <div class="org-item-name">Natl Alliance to End Homelessness</div>
+        <div class="org-item-meta">
+          <span class="org-item-location">Washington, DC — Homelessness</span>
+          <span class="org-item-dcr critical">29¢</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="suggested">
+      <div class="suggested-title">Suggested Queries</div>
+      <button class="suggested-chip" onclick="useQuery('Which organization delivers the most direct capital to its intended recipients and why does it outperform the others?')">Who performs best and why?</button>
+      <button class="suggested-chip" onclick="useQuery('Compare CEO compensation across all organizations against their Direct Capital Ratio. What does the relationship tell us?')">CEO comp vs. DCR comparison</button>
+      <button class="suggested-chip" onclick="useQuery('If Pennsylvania applied Elevate Ventures DCR to Innovation Works appropriations, how much additional capital would reach founders?')">PA opportunity cost calculation</button>
+      <button class="suggested-chip" onclick="useQuery('Which organizations have the largest gap between what they absorb in overhead versus what reaches recipients? Rank them.')">Overhead absorption ranking</button>
+      <button class="suggested-chip" onclick="useQuery('What would a 75% direct-to-founder mandate mean for Innovation Works structurally?')">Impact of 75% mandate</button>
+    </div>
+
+    <div class="sidebar-footer">
+      All data verified from primary sources. FY2023 unless noted.<br>
+      Sources: IRS 990 · FAC Single Audits · State Budgets
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-title">Interrogate The Data</div>
+        <div class="chat-subtitle">Ask anything about the verified dataset — powered by Claude</div>
+      </div>
+      <div class="data-badge">
+        <span>5</span> organizations verified<br>
+        <span>Primary source</span> data only<br>
+        Powered by <span>Claude</span>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">$</div>
+        <div class="welcome-title">Follow The Dollar</div>
+        <p class="welcome-sub">Ask anything about the <strong>5 verified organizations</strong> in this dataset. Every answer is grounded in audited IRS filings, Federal Audit Clearinghouse data, and state budget documents.<br><br>Try a suggested query or type your own.</p>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-row">
+        <textarea class="chat-input" id="chat-input" placeholder="Ask anything about the data... e.g. How does Innovation Works CEO compensation compare to founder disbursements?" rows="1"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
+      </div>
+      <div class="input-meta">
+        <span>Enter to send · Shift+Enter for new line</span>
+        <span id="key-status">API key connected</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA CONTEXT ─────────────────────────────────────────────────
+const DATA_CONTEXT = `
+You are an AI analyst for Follow The Dollar, a public accountability index that tracks how much of every taxpayer dollar reaches the people it was appropriated to serve.
+
+You have access to the following VERIFIED dataset. Every figure traces to a primary audited source. Do not speculate or invent data beyond what is provided here.
+
+METHODOLOGY:
+- Direct Capital Ratio (DCR) = Direct Disbursements to Recipients / Total State Appropriations Received
+- Sources: IRS Form 990 Schedule I (disbursements), Schedule J (exec comp), Federal Audit Clearinghouse single audits, state budget documents
+- Fiscal year: FY2023 unless noted
+
+VERIFIED ORGANIZATIONS:
+
+1. INNOVATION WORKS
+   Location: Pittsburgh, PA
+   Sector: Innovation Funding
+   DCR: 25¢ per dollar (0.25)
+   State appropriations: Received via Pennsylvania BFTP-SEP line item
+   CEO: Ven Raju — Total compensation $576,383 (Base: $396,357, Bonus: $128,375)
+   Top-10 leadership total compensation: $2,937,310
+   Other disclosed compensation:
+     - Jim Jen (Former VP & COO): $343,900
+     - Kirk Botula (VP & CSOO): $299,094
+     - Robert Starzynski (VP Business Dev & Treasurer): $272,801
+     - Kelley Benson (VP HR & Inclusion): $257,419
+     - Jeffery McDaniel (Portfolio Executive): $252,530
+     - Richard Lunak (Former President & CEO): $246,428
+     - Terri Glueck (VP Communications): $243,957
+     - Afshan Khan (Portfolio Executive): $237,362
+     - Deborah Walker (Sr. Legal Counsel): $208,436
+   Source: IRS Form 990 Schedule J, ProPublica Nonprofit Explorer FY2023
+   Key finding: Personnel costs exceeded founder disbursements in FY2025. $29M in board-designated reserves. Subsidiary VC fund not audited under GAGAS.
+   DCR trend: FY2023: 42¢ → FY2024: 31¢ → FY2025: 25¢ (declining)
+
+2. JUMPSTART
+   Location: Cleveland, OH
+   Sector: Innovation Funding
+   DCR: 21¢ per dollar (0.21)
+   Executive compensation: Not yet pulled
+   Source: IRS Form 990 Schedule I, Federal Audit Clearinghouse FY2023
+   Note: Worst performer in the three-state innovation funding comparison
+
+3. ELEVATE VENTURES
+   Location: Indianapolis, IN
+   Sector: Innovation Funding
+   DCR: 54¢ per dollar (0.54)
+   Executive compensation: Not yet pulled
+   Source: IRS Form 990 Schedule I, Federal Audit Clearinghouse FY2023
+   Note: Benchmark performer. Demonstrates that 50%+ DCR is operationally achievable for an innovation intermediary. Used as the standard in the Pittsburgh Compact 75% mandate argument.
+
+4. FEEDING AMERICA
+   Location: Chicago, IL
+   Sector: Food Security
+   DCR: 38¢ per dollar (0.38)
+   Total revenue: $3,571,430,346
+   CEO: Claire Babineaux-Fontenot — Total compensation $1,113,502 (Base: $949,866)
+   Source: IRS Form 990, ProPublica Nonprofit Explorer FY2023
+
+5. NATIONAL ALLIANCE TO END HOMELESSNESS
+   Location: Washington, DC
+   Sector: Homelessness Services
+   DCR: 29¢ per dollar (0.29)
+   CEO: Nan Roman — Total compensation $313,000
+   Source: IRS Form 990, ProPublica Nonprofit Explorer FY2022
+
+POLICY CONTEXT:
+- The Pittsburgh Compact demands a 75% direct-to-founder disbursement mandate for Pennsylvania state innovation appropriations
+- The glide path proposal: 50% → 60% → 65% → 75% over four fiscal years
+- Rep. Jeremy Shaffer (PA) is the legislative sponsor
+- June 30 PA budget deadline is the primary forcing function
+- Indiana's Elevate Ventures at 54¢ proves the mechanics are achievable
+
+RESPONSE GUIDELINES:
+- Be precise and data-driven. Always cite specific figures from the dataset.
+- When making comparisons, show the math explicitly.
+- If asked about data not in the dataset, say so clearly — do not fabricate numbers.
+- Use plain language. Avoid jargon.
+- Format responses clearly. Use line breaks for readability.
+- When relevant, connect findings to the structural argument: the stigma asymmetry between visible recipients and institutional overhead absorption.
+- Keep answers focused and actionable. Investors and policymakers are the primary audience.
+`;
+
+// ─── STATE ────────────────────────────────────────────────────────
+let apiKey = '';
+let conversationHistory = [];
+let isLoading = false;
+
+// ─── INIT ─────────────────────────────────────────────────────────
+window.onload = () => {
+  const stored = sessionStorage.getItem('ftd_api_key');
+  if (stored) {
+    apiKey = stored;
+    document.getElementById('modal').style.display = 'none';
+    document.getElementById('key-status').innerHTML = '<span>API key connected</span>';
+  }
+
+  const input = document.getElementById('chat-input');
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  });
+};
+
+function submitKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key || !key.startsWith('sk-ant-')) {
+    document.getElementById('api-key-input').style.borderColor = '#e8341a';
+    return;
+  }
+  apiKey = key;
+  sessionStorage.setItem('ftd_api_key', key);
+  document.getElementById('modal').style.display = 'none';
+}
+
+// ─── MESSAGING ────────────────────────────────────────────────────
+function askAbout(orgName) {
+  const input = document.getElementById('chat-input');
+  input.value = `Give me a full breakdown of ${orgName} — DCR, executive compensation, and what the numbers tell us about how they operate.`;
+  input.focus();
+}
+
+function useQuery(query) {
+  const input = document.getElementById('chat-input');
+  input.value = query;
+  input.focus();
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  if (!apiKey) {
+    document.getElementById('modal').style.display = 'flex';
+    return;
+  }
+
+  // Hide welcome
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  // Add user message
+  addMessage('user', text);
+  input.value = '';
+  input.style.height = 'auto';
+  conversationHistory.push({ role: 'user', content: text });
+
+  // Show typing
+  const typingId = showTyping();
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: DATA_CONTEXT,
+        messages: conversationHistory
+      })
+    });
+
+    removeTyping(typingId);
+
+    if (!response.ok) {
+      const err = await response.json();
+      addMessage('assistant', `Error: ${err.error?.message || 'API request failed. Check your API key.'}`, false);
+    } else {
+      const data = await response.json();
+      const reply = data.content[0].text;
+      conversationHistory.push({ role: 'assistant', content: reply });
+      addMessage('assistant', reply, true);
+    }
+  } catch (err) {
+    removeTyping(typingId);
+    addMessage('assistant', `Connection error: ${err.message}. Make sure your API key is valid.`, false);
+  }
+
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  input.focus();
+}
+
+function addMessage(role, text, showSource) {
+  const messages = document.getElementById('messages');
+
+  const wrapper = document.createElement('div');
+  wrapper.className = `message ${role}`;
+
+  const label = document.createElement('div');
+  label.className = 'message-label';
+  label.textContent = role === 'user' ? 'You' : 'Follow The Dollar AI';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+
+  if (role === 'assistant') {
+    bubble.innerHTML = formatResponse(text);
+  } else {
+    bubble.textContent = text;
+  }
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(bubble);
+
+  if (role === 'assistant' && showSource) {
+    const tag = document.createElement('div');
+    tag.className = 'source-tag';
+    tag.textContent = 'IRS 990 · FAC · State Budget · Primary Sources Only';
+    wrapper.appendChild(tag);
+  }
+
+  messages.appendChild(wrapper);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function formatResponse(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>');
+}
+
+function showTyping() {
+  const messages = document.getElementById('messages');
+  const id = 'typing-' + Date.now();
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'message assistant';
+  wrapper.id = id;
+
+  const label = document.createElement('div');
+  label.className = 'message-label';
+  label.textContent = 'Follow The Dollar AI';
+
+  const indicator = document.createElement('div');
+  indicator.className = 'typing-indicator';
+  indicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+  wrapper.appendChild(label);
+  wrapper.appendChild(indicator);
+  messages.appendChild(wrapper);
+  messages.scrollTop = messages.scrollHeight;
+
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+</script>
+
+</body>
+</html>
