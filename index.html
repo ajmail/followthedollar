@@ -161,6 +161,8 @@
   .btn-primary:hover { background: #c9291a; transform: translateY(-1px); }
 
   .btn-ghost {
+    text-decoration: none;
+    display: inline-block;
     background: transparent;
     color: var(--muted);
     border: 1px solid var(--border);
@@ -704,6 +706,8 @@
   }
 
   .btn-white {
+    text-decoration: none;
+    display: inline-block;
     background: var(--white);
     color: var(--red);
     border: none;
@@ -986,7 +990,7 @@
     <p class="hero-sub">Follow The Dollar tracks how much of every taxpayer dollar reaches the people it was appropriated to serve — across nonprofits, intermediaries, and public programs nationwide.</p>
     <div class="hero-actions">
       <button class="btn-primary">Search Any Organization</button>
-      <button class="btn-ghost">View Methodology</button>
+      <a href="#methodology" class="btn-ghost">View Methodology</a>
     </div>
   </div>
   <div class="hero-right">
@@ -1001,7 +1005,7 @@
   <div class="ticker">
     <div class="ticker-item"><span>Innovation Works — PA</span><span class="ratio bad">25¢</span><span class="ticker-dot"></span></div>
     <div class="ticker-item"><span>Feeding America</span><span class="ratio bad">38¢</span><span class="ticker-dot"></span></div>
-    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">54¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">55¢</span><span class="ticker-dot"></span></div>
     <div class="ticker-item"><span>JumpStart — OH</span><span class="ratio bad">21¢</span><span class="ticker-dot"></span></div>
     <div class="ticker-item"><span>Natl Alliance to End Homelessness</span><span class="ratio bad">29¢</span><span class="ticker-dot"></span></div>
     <div class="ticker-item"><span>BFTP Southeast — PA</span><span class="ratio bad">28¢</span><span class="ticker-dot"></span></div>
@@ -1071,10 +1075,10 @@
       <div class="org-name">Elevate Ventures</div>
       <div class="org-location">Indianapolis, IN</div>
       <div class="org-ratio-row">
-        <div class="org-ratio-number good">54¢</div>
+        <div class="org-ratio-number good">55¢</div>
         <div class="org-ratio-label">Direct Capital<br>Ratio</div>
       </div>
-      <div class="ratio-bar"><div class="ratio-fill good" style="width:54%"></div></div>
+      <div class="ratio-bar"><div class="ratio-fill good" style="width:55%"></div></div>
       <div class="org-meta">
         <div class="org-meta-item">
           <div class="org-meta-value">$480K</div>
@@ -1384,7 +1388,7 @@
       <div style="font-size: 10px; color: var(--red); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 20px;">Example query</div>
       <div style="font-size: 13px; color: var(--white); margin-bottom: 20px; padding: 12px 16px; background: var(--mid); border: 1px solid var(--border);">"If Pennsylvania applied Elevate Ventures' DCR to Innovation Works' appropriations, how much additional capital would reach founders?"</div>
       <div style="font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;">Follow The Dollar AI</div>
-      <div style="font-size: 12px; color: var(--light); line-height: 1.7; border-left: 2px solid var(--border); padding-left: 16px;">Elevate Ventures delivers <strong style="color: var(--red);">54¢</strong> per dollar vs Innovation Works' <strong style="color: var(--red);">25¢</strong>. On a $10M appropriation, that's a <strong style="color: var(--white);">$2.9M gap</strong> in capital that would reach founders under the Indiana model...</div>
+      <div style="font-size: 12px; color: var(--light); line-height: 1.7; border-left: 2px solid var(--border); padding-left: 16px;">Elevate Ventures delivers <strong style="color: var(--red);">55¢</strong> per dollar vs Innovation Works' <strong style="color: var(--red);">25¢</strong>. On a $10M appropriation, that's a <strong style="color: var(--white);">$2.9M gap</strong> in capital that would reach founders under the Indiana model...</div>
       <div style="font-size: 9px; color: var(--muted); margin-top: 16px; padding: 3px 8px; border: 1px solid var(--border); width: fit-content; letter-spacing: 0.1em; text-transform: uppercase;">IRS 990 · FAC · State Budget · Primary Sources Only</div>
     </div>
   </div>
@@ -1397,7 +1401,7 @@
     <div class="nomos-headline">The Commercial<br>Data Layer</div>
     <p class="nomos-desc">Nomos provides API access to the full Direct Capital Ratio dataset — enabling researchers, journalists, policymakers, and oversight bodies to query, analyze, and monitor public dollar efficiency at scale.</p>
   </div>
-  <button class="btn-white">Request API Access</button>
+  <a href="#waitlist" class="btn-white">Request API Access</a>
 </div>
 
 <!-- FOOTER -->
