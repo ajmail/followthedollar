@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,12 +16,11 @@
     --muted: #888;
     --card: #141414;
     --border: #222;
+    --section-pad: clamp(24px, 4vw, 48px);
+    --section-gap: clamp(40px, 6vw, 80px);
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
-
   body {
     background: var(--black);
     color: var(--white);
@@ -28,13 +28,1827 @@
     font-weight: 300;
     overflow-x: hidden;
     cursor: crosshair;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
-
-  /* GRAIN OVERLAY */
+  img, svg { max-width: 100%; height: auto; }
+  button, input, select { font: inherit; }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
   body::before {
     content: '';
     position: fixed;
     inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 20px var(--section-pad);
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .nav-logo span { color: var(--red); }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr);
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-left,
+  .hero-right {
+    min-width: 0;
+  }
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(48px, 8vw, 80px) var(--section-pad);
+    position: relative;
+    z-index: 2;
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+  .hero-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+    word-break: break-word;
+  }
+  .hero-headline .accent { color: var(--red); }
+  .hero-sub {
+    font-size: clamp(15px, 2.2vw, 16px);
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+  .btn-primary,
+  .btn-ghost,
+  .btn-white,
+  .search-btn,
+  .waitlist-btn {
+    min-height: 48px;
+  }
+  .btn-primary {
+    background: var(--red);
+    color: var(--white);
+    border: none;
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { background: #c9291a; transform: translateY(-1px); }
+  .btn-ghost {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--white); border-color: var(--muted); }
+  .hero-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: clamp(48px, 8vw, 80px) var(--section-pad);
+    border-left: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .big-number-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.5s;
+  }
+  .big-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(96px, 18vw, 220px);
+    line-height: 0.95;
+    color: var(--red);
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.7s;
+    position: relative;
+    word-break: break-word;
+  }
+  .big-number-unit {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(32px, 5vw, 64px);
+    color: var(--dim);
+    display: block;
+    margin-top: -4px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.9s;
+  }
+  .big-number-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 320px;
+    margin-top: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 1.1s;
+  }
+  .hero-right::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(232,52,26,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .ticker-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--dim);
+    overflow: hidden;
+    padding: 12px 0;
+    position: relative;
+  }
+  .ticker {
+    display: flex;
+    gap: 80px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .ticker-item .ratio {
+    color: var(--white);
+    font-weight: 500;
+  }
+  .ticker-item .ratio.good { color: #4ade80; }
+  .ticker-item .ratio.bad { color: var(--red); }
+  .ticker-dot {
+    width: 4px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 50%;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .section-header {
+    padding: 0 var(--section-pad);
+    margin-bottom: 48px;
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    color: var(--white);
+    letter-spacing: 0.02em;
+    line-height: 0.96;
+  }
+  .orgs-section,
+  .search-section,
+  .map-section,
+  .method-section,
+  .waitlist-section,
+  .byoai-section,
+  .nomos-band,
+  footer {
+    padding: clamp(60px, 8vw, 100px) var(--section-pad);
+  }
+  .orgs-section,
+  .search-section,
+  .map-section,
+  .method-section,
+  .waitlist-section,
+  .byoai-section {
+    border-top: 1px solid var(--border);
+  }
+  .orgs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 48px;
+  }
+  .org-card {
+    background: var(--card);
+    padding: 32px;
+    transition: background 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .org-card:hover { background: #1a1a1a; }
+  .org-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--red);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.3s ease;
+  }
+  .org-card:hover::before { transform: scaleY(1); }
+  .org-category {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .org-name {
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .org-location {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .org-ratio-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .org-ratio-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 8vw, 52px);
+    line-height: 1;
+  }
+  .org-ratio-number.critical { color: var(--red); }
+  .org-ratio-number.poor { color: #f97316; }
+  .org-ratio-number.fair { color: #eab308; }
+  .org-ratio-number.good { color: #4ade80; }
+  .org-ratio-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 8px;
+    text-align: right;
+  }
+  .ratio-bar {
+    height: 3px;
+    background: var(--dim);
+    width: 100%;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .ratio-fill {
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: width 1s ease;
+  }
+  .ratio-fill.critical { background: var(--red); }
+  .ratio-fill.poor { background: #f97316; }
+  .ratio-fill.fair { background: #eab308; }
+  .ratio-fill.good { background: #4ade80; }
+  .org-meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .org-meta-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+  .org-meta-key {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .search-section {
+    background: var(--dim);
+  }
+  .search-bar {
+    display: flex;
+    gap: 0;
+    margin-top: 48px;
+    border: 1px solid var(--border);
+    max-width: 800px;
+    width: 100%;
+  }
+  .search-input {
+    flex: 1;
+    min-width: 0;
+    background: var(--black);
+    border: none;
+    padding: 20px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--white);
+    outline: none;
+  }
+  .search-input::placeholder { color: var(--muted); }
+  .search-btn {
+    background: var(--red);
+    border: none;
+    padding: 20px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .search-btn:hover { background: #c9291a; }
+  .filter-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    min-height: 40px;
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .map-shell {
+    margin-top: 48px;
+  }
+  .map-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    width: fit-content;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .map-tabs::-webkit-scrollbar { display: none; }
+  .map-tab {
+    background: var(--dim);
+    border: none;
+    border-right: 1px solid var(--border);
+    padding: 12px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+    min-height: 44px;
+  }
+  .map-tab:last-child { border-right: none; }
+  .map-tab.active { background: var(--red); color: #fff; }
+  .map-sector-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    min-height: 16px;
+  }
+  #ftd-map-container {
+    width: 100%;
+    position: relative;
+    background: var(--black);
+    border: 1px solid var(--border);
+    min-height: 380px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #ftd-map-loading {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .map-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 16px;
+    border: 1px solid var(--border);
+  }
+  .map-legend-card {
+    padding: 10px 16px;
+    border-right: 1px solid var(--border);
+    min-width: 0;
+  }
+  .map-legend-card:last-child { border-right: none; }
+  .legend-heading {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .legend-heading.verified { color: var(--red); }
+  .legend-heading.pipeline { color: #f97316; }
+  .legend-heading.none { color: var(--muted); }
+  .legend-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 3px;
+    line-height: 1.5;
+  }
+  .legend-line:last-child { margin-bottom: 0; }
+  .legend-box {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+  }
+  .method-section,
+  .waitlist-section,
+  .byoai-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--section-gap);
+    align-items: center;
+  }
+  .method-formula {
+    margin-top: 48px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: clamp(24px, 5vw, 40px);
+    font-family: 'DM Mono', monospace;
+  }
+  .formula-line {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .formula-main {
+    font-size: clamp(18px, 3.4vw, 22px);
+    color: var(--white);
+    margin: 20px 0;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+  .formula-main .highlight { color: var(--red); }
+  .formula-source {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    line-height: 1.7;
+  }
+  .method-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .method-steps { margin-top: 32px; }
+  .method-step {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .method-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--dim);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 48px;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .waitlist-section {
+    background: var(--dim);
+  }
+  .waitlist-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 16px;
+  }
+  .waitlist-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 52px);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .waitlist-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 380px;
+  }
+  .waitlist-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .waitlist-row {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+  }
+  .waitlist-input,
+  .waitlist-select {
+    flex: 1;
+    min-width: 0;
+    background: var(--black);
+    border: none;
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    outline: none;
+    min-height: 48px;
+  }
+  .waitlist-input::placeholder { color: var(--muted); }
+  .waitlist-select {
+    border-left: 1px solid var(--border);
+    color: var(--muted);
+    appearance: none;
+    cursor: pointer;
+  }
+  .waitlist-select option { background: var(--black); }
+  .waitlist-btn {
+    background: var(--red);
+    border: none;
+    padding: 18px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--white);
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100%;
+  }
+  .waitlist-btn:hover { background: #c9291a; }
+  .waitlist-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .waitlist-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  .waitlist-count-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--red);
+    line-height: 1;
+  }
+  .waitlist-count-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .waitlist-success {
+    display: none;
+    padding: 20px;
+    border: 1px solid var(--red);
+    background: rgba(232,52,26,0.06);
+  }
+  .waitlist-success-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--white);
+    line-height: 1.6;
+  }
+  .waitlist-success-text span { color: var(--red); }
+  .byoai-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+  .byoai-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 5vw, 64px);
+    color: var(--white);
+    line-height: 0.95;
+    margin-bottom: 24px;
+  }
+  .byoai-copy {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 420px;
+    margin-bottom: 32px;
+  }
+  .byoai-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--red);
+    color: var(--white);
+    padding: 14px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s;
+    min-height: 48px;
+  }
+  .byoai-link:hover { background: #c9291a; }
+  .byoai-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    padding: clamp(24px, 5vw, 32px);
+    font-family: 'DM Mono', monospace;
+  }
+  .byoai-card-label {
+    font-size: 10px;
+    color: var(--red);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .byoai-query {
+    font-size: 13px;
+    color: var(--white);
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    line-height: 1.6;
+  }
+  .byoai-mini-label {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .byoai-answer {
+    font-size: 12px;
+    color: var(--white);
+    line-height: 1.7;
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+  }
+  .byoai-foot {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 16px;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    width: fit-content;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .nomos-band {
+    background: var(--red);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  .nomos-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 12px;
+  }
+  .nomos-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4vw, 56px);
+    color: var(--white);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .nomos-desc {
+    font-size: 15px;
+    color: rgba(255,255,255,0.7);
+    max-width: 480px;
+    line-height: 1.6;
+    margin-top: 16px;
+  }
+  .btn-white {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+    color: var(--red);
+    border: none;
+    padding: 16px 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .btn-white:hover { opacity: 0.9; }
+  footer {
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .footer-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .footer-logo span { color: var(--red); }
+  .footer-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.6;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-cell {
+    padding: clamp(28px, 5vw, 48px);
+    border-right: 1px solid var(--border);
+    min-width: 0;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 5vw, 72px);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-value .red { color: var(--red); }
+  .stat-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .state { fill: #1e1e1e; stroke: #111; stroke-width: 0.5; transition: fill 0.3s; }
+  .state:hover { fill: #333; }
+  .state.critical { fill: rgba(232,52,26,0.7); }
+  .state.poor { fill: rgba(249,115,22,0.6); }
+  .state.fair { fill: rgba(234,179,8,0.5); }
+  .state.good { fill: rgba(74,222,128,0.5); }
+  @media (max-width: 1100px) {
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .hero-right {
+      border-left: none;
+      border-top: 1px solid var(--border);
+    }
+    .method-section,
+    .waitlist-section,
+    .byoai-section {
+      grid-template-columns: 1fr;
+    }
+    .nomos-band,
+    footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .footer-note {
+      text-align: left;
+    }
+  }
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    nav {
+      flex-direction: column;
+      align-items: flex-start;
+      padding-top: 14px;
+      padding-bottom: 14px;
+    }
+    .nav-links {
+      width: 100%;
+      gap: 20px;
+      padding-bottom: 4px;
+    }
+    .hero {
+      padding-top: 104px;
+    }
+    .hero-left,
+    .hero-right {
+      padding-top: 44px;
+      padding-bottom: 44px;
+    }
+    .hero-headline {
+      font-size: clamp(48px, 17vw, 82px);
+      margin-bottom: 20px;
+    }
+    .hero-sub,
+    .big-number-desc {
+      max-width: none;
+    }
+    .hero-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .hero-actions > * {
+      width: 100%;
+    }
+    .ticker {
+      gap: 48px;
+      animation-duration: 22s;
+    }
+    .section-header {
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .org-card {
+      padding: 24px;
+    }
+    .org-ratio-row {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .org-ratio-label {
+      text-align: left;
+      padding-bottom: 0;
+    }
+    .org-meta {
+      grid-template-columns: 1fr;
+    }
+    .search-bar,
+    .waitlist-row {
+      flex-direction: column;
+    }
+    .search-btn,
+    .waitlist-select {
+      border-top: 1px solid var(--border);
+      border-left: none;
+    }
+    .map-shell {
+      margin-top: 32px;
+    }
+    #ftd-map-container {
+      min-height: 260px;
+    }
+    .map-legend-grid {
+      grid-template-columns: 1fr;
+    }
+    .map-legend-card {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .map-legend-card:last-child {
+      border-bottom: none;
+    }
+    .method-step {
+      gap: 16px;
+    }
+    .step-num {
+      width: 36px;
+      font-size: 38px;
+    }
+    .byoai-headline {
+      font-size: clamp(34px, 13vw, 56px);
+    }
+    .nomos-band,
+    footer {
+      align-items: stretch;
+    }
+    .btn-white,
+    .byoai-link {
+      width: 100%;
+    }
+    .footer-note {
+      text-align: left;
+    }
+  }
+  @media (max-width: 480px) {
+    .hero {
+      padding-top: 116px;
+    }
+    .big-number {
+      font-size: clamp(84px, 24vw, 120px);
+    }
+    .big-number-unit {
+      font-size: clamp(28px, 9vw, 42px);
+      margin-top: 2px;
+    }
+    .stat-desc,
+    .legend-line,
+    .waitlist-note,
+    .footer-note {
+      text-transform: none;
+      letter-spacing: 0.03em;
+    }
+    #ftd-map-tooltip {
+      display: none !important;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .ticker {
+      animation: none;
+      overflow-x: auto;
+      padding: 0 var(--section-pad);
+    }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">Follow<span>The</span>Dollar</div>
+  <ul class="nav-links">
+    <li><a href="#database">Database</a></li>
+    <li><a href="#search">Search</a></li>
+    <li><a href="#map">Map</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="interrogate.html" style="color: var(--red);">Interrogate ↗</a></li>
+    <li><a href="#nomos">API Access</a></li>
+  </ul>
+</nav>
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Transparency Infrastructure</div>
+    <h1 class="hero-headline">Where Does<br>The <span class="accent">Money</span><br>Actually Go?</h1>
+    <p class="hero-sub">Follow The Dollar tracks how much of every taxpayer dollar reaches the people it was appropriated to serve — across nonprofits, intermediaries, and public programs nationwide.</p>
+    <div class="hero-actions">
+      <button class="btn-primary">Search Any Organization</button>
+      <a href="#methodology" class="btn-ghost">View Methodology</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="big-number-label">National median — Direct Capital Ratio</div>
+    <div class="big-number">31<span class="big-number-unit">¢ per dollar</span></div>
+    <p class="big-number-desc">Across the 200 largest publicly-funded nonprofits in America, the median recipient receives 31 cents of every dollar appropriated in their name. Source: IRS Form 990 + Federal Audit Clearinghouse.</p>
+  </div>
+</section>
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span>Innovation Works — PA</span><span class="ratio bad">25¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Feeding America</span><span class="ratio bad">38¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">55¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>JumpStart — OH</span><span class="ratio bad">21¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Natl Alliance to End Homelessness</span><span class="ratio bad">29¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>BFTP Southeast — PA</span><span class="ratio bad">28¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Innovation Works — PA</span><span class="ratio bad">25¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Feeding America</span><span class="ratio bad">38¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Elevate Ventures — IN</span><span class="ratio good">55¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>JumpStart — OH</span><span class="ratio bad">21¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Natl Alliance to End Homelessness</span><span class="ratio bad">29¢</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>BFTP Southeast — PA</span><span class="ratio bad">28¢</span><span class="ticker-dot"></span></div>
+  </div>
+</div>
+<div class="stat-row">
+  <div class="stat-cell reveal">
+    <div class="stat-value"><span class="red">$2.3T</span></div>
+    <div class="stat-desc">Annual public funding flowing through nonprofit intermediaries in the US</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-value">31<span class="red">¢</span></div>
+    <div class="stat-desc">Median cents per dollar reaching intended recipients</div>
+  </div>
+  <div class="stat-cell reveal">
+    <div class="stat-value"><span class="red">1.8M</span></div>
+    <div class="stat-desc">Nonprofit 990 filings analyzed via IRS public dataset</div>
+  </div>
+</div>
+<section class="orgs-section" id="database">
+  <div class="section-header reveal">
+    <span class="section-label">Database</span>
+    <h2 class="section-title">Organization Profiles</h2>
+  </div>
+  <div class="orgs-grid">
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Pennsylvania</div>
+      <div class="org-name">Innovation Works</div>
+      <div class="org-location">Pittsburgh, PA</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">25¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:25%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$576K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">$2.9M</div>
+          <div class="org-meta-key">Top-10 Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Indiana</div>
+      <div class="org-name">Elevate Ventures</div>
+      <div class="org-location">Indianapolis, IN</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number good">55¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill good" style="width:55%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$480K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">IN</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2024</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-card reveal">
+      <div class="org-category">Innovation Funding — Ohio</div>
+      <div class="org-name">JumpStart</div>
+      <div class="org-location">Cleveland, OH</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">21¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:21%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$777K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">OH</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2024</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-card reveal">
+      <div class="org-category">Food Security — National</div>
+      <div class="org-name">Feeding America</div>
+      <div class="org-location">Chicago, IL</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number poor">38¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill poor" style="width:38%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$1.1M</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">$3.5B</div>
+          <div class="org-meta-key">Revenue</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2023</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-card reveal">
+      <div class="org-category">Homelessness — National</div>
+      <div class="org-name">Natl Alliance to End Homelessness</div>
+      <div class="org-location">Washington, DC</div>
+      <div class="org-ratio-row">
+        <div class="org-ratio-number critical">29¢</div>
+        <div class="org-ratio-label">Direct Capital<br>Ratio</div>
+      </div>
+      <div class="ratio-bar"><div class="ratio-fill critical" style="width:29%"></div></div>
+      <div class="org-meta">
+        <div class="org-meta-item">
+          <div class="org-meta-value">$313K</div>
+          <div class="org-meta-key">CEO Comp</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">DC</div>
+          <div class="org-meta-key">State</div>
+        </div>
+        <div class="org-meta-item">
+          <div class="org-meta-value">FY2022</div>
+          <div class="org-meta-key">990 Year</div>
+        </div>
+      </div>
+    </div>
+    <div class="org-card reveal" style="display:flex;align-items:center;justify-content:center;min-height:280px;">
+      <div style="text-align:center;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--dim);margin-bottom:12px;">+1,847</div>
+        <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);">More organizations<br>in the database</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="search-section" id="search">
+  <div class="section-header reveal">
+    <span class="section-label">Search</span>
+    <h2 class="section-title">Find Any Organization</h2>
+  </div>
+  <div class="search-bar reveal">
+    <input class="search-input" type="text" placeholder="Search by name, EIN, state, or category...">
+    <button class="search-btn">Search</button>
+  </div>
+  <div class="filter-row reveal">
+    <button class="filter-chip active">All</button>
+    <button class="filter-chip">Innovation Funding</button>
+    <button class="filter-chip">Food Security</button>
+    <button class="filter-chip">Homelessness</button>
+    <button class="filter-chip">Workforce Dev</button>
+    <button class="filter-chip">Healthcare Access</button>
+    <button class="filter-chip">Pennsylvania</button>
+    <button class="filter-chip">DCR &lt; 30¢</button>
+  </div>
+</section>
+<section class="map-section" id="map">
+  <div class="section-header reveal">
+    <span class="section-label">Geography</span>
+    <h2 class="section-title">State-Level Performance</h2>
+  </div>
+  <div class="reveal map-shell">
+    <div class="map-tabs" aria-label="Sector filters">
+      <button onclick="setSector('all')" id="tab-all" class="map-tab active">All Sectors</button>
+      <button onclick="setSector('innovation')" id="tab-innovation" class="map-tab">Innovation</button>
+      <button onclick="setSector('food')" id="tab-food" class="map-tab">Food Security</button>
+      <button onclick="setSector('homelessness')" id="tab-homelessness" class="map-tab">Homelessness</button>
+      <button onclick="setSector('workforce')" id="tab-workforce" class="map-tab">Workforce Dev</button>
+      <button onclick="setSector('healthcare')" id="tab-healthcare" class="map-tab">Healthcare</button>
+    </div>
+    <div id="map-sector-label" class="map-sector-label"></div>
+    <div id="ftd-map-container">
+      <div id="ftd-map-loading">Loading map...</div>
+    </div>
+    <div class="map-legend-grid">
+      <div class="map-legend-card">
+        <div class="legend-heading verified">Verified</div>
+        <div class="legend-line"><div class="legend-box" style="background:#4ade80;"></div>50¢+ Strong</div>
+        <div class="legend-line"><div class="legend-box" style="background:#eab308;"></div>35–50¢ Fair</div>
+        <div class="legend-line"><div class="legend-box" style="background:#f97316;"></div>20–35¢ Poor</div>
+        <div class="legend-line"><div class="legend-box" style="background:#e8341a;"></div>&lt;20¢ Critical</div>
+      </div>
+      <div class="map-legend-card">
+        <div class="legend-heading pipeline">In Pipeline</div>
+        <div class="legend-line"><div class="legend-box" style="background:#1e3a2f;border:1px solid #2a5a45;"></div>Program exists, data pending</div>
+      </div>
+      <div class="map-legend-card">
+        <div class="legend-heading none">No Program</div>
+        <div class="legend-line"><div class="legend-box" style="background:#111;border:1px solid #1a1a1a;"></div>No public intermediary</div>
+      </div>
+    </div>
+  </div>
+</section>
+<div id="ftd-map-tooltip" style="display:none;position:fixed;background:#1e1e1e;border:1px solid var(--red);padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--white);pointer-events:none;z-index:9999;white-space:nowrap;line-height:1.8;max-width:min(300px, calc(100vw - 24px));"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+(function() {
+  const SECTORS = {
+    all: {
+      label: "Showing all sectors — 5 organizations verified across Innovation, Food Security, and Homelessness",
+      verified: {
+        "Pennsylvania": { dcr:25, org:"Innovation Works", sector:"Innovation", ceo:"$576K", fy:"FY2023", rating:"critical" },
+        "Ohio":         { dcr:21, org:"JumpStart", sector:"Innovation", ceo:"$777K", fy:"FY2024", rating:"critical" },
+        "Indiana":      { dcr:55, org:"Elevate Ventures", sector:"Innovation", ceo:"$480K", fy:"FY2024", rating:"good" },
+        "Illinois":     { dcr:38, org:"Feeding America (HQ)", sector:"Food Security", ceo:"$1.1M", fy:"FY2023", rating:"poor" }
+      },
+      pipeline: ["Michigan","New York","Massachusetts","Maryland","Virginia","North Carolina","Georgia","Florida","Texas","Colorado","New Jersey","Connecticut","Minnesota","Wisconsin","Missouri","Washington","Oregon","Iowa","Kansas","Nebraska","Utah","Alabama","Arkansas","Tennessee","Kentucky","Louisiana","South Carolina","Arizona","Delaware","Rhode Island","New Hampshire","Maine","Vermont","West Virginia","California","Nevada","New Mexico","Oklahoma","Mississippi","Alaska","Hawaii","Montana","North Dakota","South Dakota","Idaho","Wyoming","District of Columbia"],
+      noProgram: []
+    },
+    innovation: {
+      label: "Innovation Funding — publicly-funded startup intermediaries. ~30 states have active programs.",
+      verified: {
+        "Pennsylvania": { dcr:25, org:"Innovation Works", sector:"Innovation", ceo:"$576K", fy:"FY2023", rating:"critical" },
+        "Ohio":         { dcr:21, org:"JumpStart", sector:"Innovation", ceo:"$777K", fy:"FY2024", rating:"critical" },
+        "Indiana":      { dcr:55, org:"Elevate Ventures", sector:"Innovation", ceo:"$480K", fy:"FY2024", rating:"good" }
+      },
+      pipeline: ["Michigan","New York","Massachusetts","Maryland","Virginia","North Carolina","Georgia","Florida","Texas","Illinois","Colorado","New Jersey","Connecticut","Minnesota","Wisconsin","Missouri","Washington","Oregon","Iowa","Kansas","Nebraska","Utah","Alabama","Arkansas","Tennessee","Delaware","California","Arizona"],
+      noProgram: ["Montana","North Dakota","South Dakota","Idaho","Wyoming","New Mexico","Mississippi","Alaska","Hawaii","Oklahoma","West Virginia","Louisiana","Kentucky","South Carolina","Rhode Island","New Hampshire","Maine","Vermont","Nevada"]
+    },
+    food: {
+      label: "Food Security — every state has food bank infrastructure. National orgs like Feeding America operate in all 50.",
+      verified: {
+        "Illinois": { dcr:38, org:"Feeding America (HQ)", sector:"Food Security", ceo:"$1.1M", fy:"FY2023", rating:"poor" }
+      },
+      pipeline: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","Indiana","District of Columbia"],
+      noProgram: []
+    },
+    homelessness: {
+      label: "Homelessness Services — Continuum of Care programs operate in every state, all federally funded.",
+      verified: {
+        "District of Columbia": { dcr:29, org:"Natl Alliance to End Homelessness", sector:"Homelessness", ceo:"$313K", fy:"FY2022", rating:"critical" }
+      },
+      pipeline: ["California","New York","Texas","Florida","Washington","Oregon","Colorado","Arizona","Massachusetts","Illinois","Georgia","Ohio","Pennsylvania","Michigan","North Carolina","Virginia","Maryland","Minnesota","Wisconsin","Indiana","Missouri","Tennessee","Nevada","New Jersey","Connecticut","Louisiana","Alabama","Arkansas","South Carolina","Kentucky","Iowa","Oklahoma","Kansas","Nebraska","New Mexico","Utah","Idaho","Montana","Wyoming","North Dakota","South Dakota","West Virginia","Rhode Island","New Hampshire","Maine","Vermont","Delaware","Mississippi","Alaska","Hawaii"],
+      noProgram: []
+    },
+    workforce: {
+      label: "Workforce Development — state workforce boards and intermediaries exist in all 50 states under WIOA.",
+      verified: {},
+      pipeline: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia"],
+      noProgram: []
+    },
+    healthcare: {
+      label: "Healthcare Access — federally qualified health centers and state access programs in all 50 states.",
+      verified: {},
+      pipeline: ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming","District of Columbia"],
+      noProgram: []
+    }
+  };
+  const stateNames = {
+    "01":"Alabama","02":"Alaska","04":"Arizona","05":"Arkansas","06":"California",
+    "08":"Colorado","09":"Connecticut","10":"Delaware","11":"District of Columbia",
+    "12":"Florida","13":"Georgia","15":"Hawaii","16":"Idaho","17":"Illinois",
+    "18":"Indiana","19":"Iowa","20":"Kansas","21":"Kentucky","22":"Louisiana",
+    "23":"Maine","24":"Maryland","25":"Massachusetts","26":"Michigan","27":"Minnesota",
+    "28":"Mississippi","29":"Missouri","30":"Montana","31":"Nebraska","32":"Nevada",
+    "33":"New Hampshire","34":"New Jersey","35":"New Mexico","36":"New York",
+    "37":"North Carolina","38":"North Dakota","39":"Ohio","40":"Oklahoma","41":"Oregon",
+    "42":"Pennsylvania","44":"Rhode Island","45":"South Carolina","46":"South Dakota",
+    "47":"Tennessee","48":"Texas","49":"Utah","50":"Vermont","51":"Virginia",
+    "53":"Washington","54":"West Virginia","55":"Wisconsin","56":"Wyoming"
+  };
+  let currentSector = "all";
+  let svgEl = null;
+  let statesData = null;
+  const isTouchLike = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  function getRatingColor(r) {
+    if (r === "good") return "#4ade80";
+    if (r === "fair") return "#eab308";
+    if (r === "poor") return "#f97316";
+    if (r === "critical") return "#e8341a";
+    return "#2a2a2a";
+  }
+  function getStateFill(name, sector) {
+    const s = SECTORS[sector];
+    if (s.verified[name]) return getRatingColor(s.verified[name].rating);
+    if (s.noProgram && s.noProgram.includes(name)) return "#111111";
+    if (s.pipeline.includes(name)) return "#1e3a2f";
+    return "#1a1a1a";
+  }
+  function getStateStroke(name, sector) {
+    const s = SECTORS[sector];
+    if (s.verified[name]) return "#0a0a0a";
+    if (s.noProgram && s.noProgram.includes(name)) return "#1a1a1a";
+    if (s.pipeline.includes(name)) return "#2a5a45";
+    return "#222";
+  }
+  function getStateOpacity(name, sector) {
+    const s = SECTORS[sector];
+    if (s.verified[name]) return 1;
+    if (s.noProgram && s.noProgram.includes(name)) return 0.4;
+    return 0.85;
+  }
+  function updateMap(sector) {
+    if (!svgEl || !statesData) return;
+    const s = SECTORS[sector];
+    document.getElementById("map-sector-label").textContent = s.label;
+    const W = 680;
+    const H = Math.round(680 * 0.6);
+    const projection = d3.geoAlbersUsa().scale(W * 1.22).translate([W / 2, H / 2]);
+    const path = d3.geoPath().projection(projection);
+    svgEl.selectAll("path.ftd-state")
+      .transition().duration(300)
+      .attr("fill", d => getStateFill(stateNames[String(d.id).padStart(2, "0")], sector))
+      .attr("stroke", d => getStateStroke(stateNames[String(d.id).padStart(2, "0")], sector))
+      .attr("opacity", d => getStateOpacity(stateNames[String(d.id).padStart(2, "0")], sector));
+    svgEl.selectAll("text.ftd-dcr").remove();
+    if (!isTouchLike) {
+      svgEl.selectAll("text.ftd-dcr")
+        .data(statesData.features.filter(d => s.verified[stateNames[String(d.id).padStart(2, "0")]]))
+        .join("text")
+        .attr("class", "ftd-dcr")
+        .attr("x", d => path.centroid(d)[0])
+        .attr("y", d => path.centroid(d)[1] + 4)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "monospace")
+        .attr("font-size", "11px")
+        .attr("font-weight", "700")
+        .attr("fill", d => {
+          const name = stateNames[String(d.id).padStart(2, "0")];
+          return s.verified[name]?.rating === "good" ? "#052e16" : "#ffffff";
+        })
+        .attr("pointer-events", "none")
+        .text(d => {
+          const name = stateNames[String(d.id).padStart(2, "0")];
+          return s.verified[name] ? s.verified[name].dcr + "¢" : "";
+        });
+    }
+    svgEl.select("text.ftd-footer-pipeline").text(`${s.pipeline.length} states — data pull in progress`);
+    svgEl.select("text.ftd-footer-verified").text(`${Object.keys(s.verified).length} state${Object.keys(s.verified).length !== 1 ? "s" : ""} verified · followthedollar.org`);
+  }
+  window.setSector = function(sector) {
+    currentSector = sector;
+    document.querySelectorAll(".map-tab").forEach(btn => btn.classList.remove("active"));
+    const active = document.getElementById("tab-" + sector);
+    if (active) active.classList.add("active");
+    updateMap(sector);
+  };
+  const container = document.getElementById("ftd-map-container");
+  const tooltip = document.getElementById("ftd-map-tooltip");
+  const W = 680;
+  const H = Math.round(680 * 0.6);
+  container.style.minHeight = (isTouchLike ? 260 : H) + "px";
+  const svg = d3.select("#ftd-map-container")
+    .append("svg")
+    .attr("width", "100%")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("display", "block");
+  svgEl = svg;
+  const projection = d3.geoAlbersUsa().scale(W * 1.22).translate([W / 2, H / 2]);
+  const path = d3.geoPath().projection(projection);
+  d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us => {
+    document.getElementById("ftd-map-loading").remove();
+    const states = topojson.feature(us, us.objects.states);
+    statesData = states;
+    const selection = svg.selectAll("path.ftd-state")
+      .data(states.features)
+      .join("path")
+      .attr("class", "ftd-state")
+      .attr("d", path)
+      .attr("fill", d => getStateFill(stateNames[String(d.id).padStart(2, "0")], "all"))
+      .attr("stroke", d => getStateStroke(stateNames[String(d.id).padStart(2, "0")], "all"))
+      .attr("stroke-width", 0.8)
+      .attr("opacity", d => getStateOpacity(stateNames[String(d.id).padStart(2, "0")], "all"));
+    if (!isTouchLike) {
+      selection
+        .on("mousemove", function(event, d) {
+          const name = stateNames[String(d.id).padStart(2, "0")] || "Unknown";
+          const s = SECTORS[currentSector];
+          const data = s.verified[name];
+          let html = "";
+          if (data) {
+            const rc = getRatingColor(data.rating);
+            html = `<span style="color:#e8341a;font-weight:700;">${name}</span><br>` +
+                   `<span style="color:#666;">${data.sector}</span> — ${data.org}<br>` +
+                   `DCR: <span style="color:${rc};font-weight:700;">${data.dcr}¢</span> &nbsp; CEO: <span style="color:#f5f2eb;">${data.ceo}</span> &nbsp; <span style="color:#555;">${data.fy}</span>`;
+          } else if (s.noProgram && s.noProgram.includes(name)) {
+            html = `<span style="color:#444;">${name}</span><br><span style="color:#333;font-size:10px;">No public intermediary in this sector</span>`;
+          } else if (s.pipeline.includes(name)) {
+            html = `<span style="color:#f5f2eb;">${name}</span><br><span style="color:#2a5a45;font-size:10px;">Program identified — data pull in progress</span>`;
+          } else {
+            html = `<span style="color:#444;">${name}</span>`;
+          }
+          tooltip.innerHTML = html;
+          tooltip.style.display = "block";
+          tooltip.style.left = Math.min(event.clientX + 14, window.innerWidth - tooltip.offsetWidth - 12) + "px";
+          tooltip.style.top = Math.max(event.clientY - 10, 12) + "px";
+        })
+        .on("mouseleave", () => { tooltip.style.display = "none"; });
+    }
+    const s0 = SECTORS.all;
+    if (!isTouchLike) {
+      svg.selectAll("text.ftd-dcr")
+        .data(states.features.filter(d => s0.verified[stateNames[String(d.id).padStart(2, "0")]]))
+        .join("text")
+        .attr("class", "ftd-dcr")
+        .attr("x", d => path.centroid(d)[0])
+        .attr("y", d => path.centroid(d)[1] + 4)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "monospace")
+        .attr("font-size", "11px")
+        .attr("font-weight", "700")
+        .attr("fill", d => {
+          const name = stateNames[String(d.id).padStart(2, "0")];
+          return s0.verified[name]?.rating === "good" ? "#052e16" : "#ffffff";
+        })
+        .attr("pointer-events", "none")
+        .text(d => {
+          const name = stateNames[String(d.id).padStart(2, "0")];
+          return s0.verified[name] ? s0.verified[name].dcr + "¢" : "";
+        });
+    }
+    svg.append("text").attr("class", "ftd-footer-pipeline")
+      .attr("x", W - 10).attr("y", H - 22)
+      .attr("text-anchor", "end").attr("font-family", "monospace").attr("font-size", "9px").attr("fill", "#2a5a45")
+      .text(`${s0.pipeline.length} states — data pull in progress`);
+    svg.append("text").attr("class", "ftd-footer-verified")
+      .attr("x", W - 10).attr("y", H - 10)
+      .attr("text-anchor", "end").attr("font-family", "monospace").attr("font-size", "9px").attr("fill", "#444")
+      .text(`${Object.keys(s0.verified).length} states verified · followthedollar.org`);
+    document.getElementById("map-sector-label").textContent = s0.label;
+  }).catch(() => {
+    document.getElementById("ftd-map-loading").textContent = "Map unavailable — check connection.";
+  });
+})();
+</script>
+<section class="method-section" id="methodology">
+  <div class="method-left reveal">
+    <div class="section-label">Methodology</div>
+    <h2 class="section-title" style="margin-top:8px;">The Direct Capital Ratio</h2>
+    <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-top:20px;">Developed from forensic analysis of Pennsylvania's innovation funding ecosystem. Every figure traces to a primary audited source — no estimates, no projections.</p>
+    <div class="method-formula">
+      <div class="formula-line">DCR =</div>
+      <div class="formula-main">
+        <span class="highlight">Direct Disbursements to Recipients</span><br>
+        ────────────────────────────<br>
+        Total State Appropriations Received
+      </div>
+      <div class="formula-source">
+        Sources: IRS Form 990 Schedule I · Federal Audit Clearinghouse single audits · State budget documents · SAM.gov
+      </div>
+    </div>
+  </div>
+  <div class="method-right reveal">
+    <div class="section-label">How It Works</div>
+    <div class="method-steps">
+      <div class="method-step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="step-title">Pull state appropriations</div>
+          <div class="step-desc">Total public dollars received by the organization from state budget documents and federal audit clearinghouse single audits.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="step-title">Identify direct disbursements</div>
+          <div class="step-desc">Grants and direct capital flowing to intended recipients, sourced from IRS Form 990 Schedule I filings on ProPublica Nonprofit Explorer.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="step-title">Calculate the ratio</div>
+          <div class="step-desc">Divide disbursements by appropriations. The result is how many cents of every public dollar actually reached the intended recipient.</div>
+        </div>
+      </div>
+      <div class="method-step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="step-title">Cross-reference exec comp</div>
+          <div class="step-desc">Layer in Schedule J compensation data to show the relationship between overhead absorption and leadership pay.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="waitlist-section" id="waitlist">
+  <div class="waitlist-left reveal">
+    <div class="waitlist-eyebrow">Early Access</div>
+    <h2 class="waitlist-headline">Get Notified When Your State Goes Live</h2>
+    <p class="waitlist-sub">We're expanding the Direct Capital Ratio database state by state. Join the waitlist to be notified when your state's organizations are published — and to request API access via Nomos.</p>
+    <div class="waitlist-count">
+      <div class="waitlist-count-num" id="waitlist-counter">0</div>
+      <div class="waitlist-count-label">researchers, journalists and policy teams on the list</div>
+    </div>
+  </div>
+  <div class="waitlist-right reveal">
+    <div class="waitlist-form" id="waitlist-form">
+      <div class="waitlist-row">
+        <input class="waitlist-input" type="email" placeholder="your@email.com" id="waitlist-email">
+      </div>
+      <div class="waitlist-row">
+        <select class="waitlist-select" id="waitlist-role">
+          <option value="" disabled selected>I am a...</option>
+          <option value="researcher">Researcher / Academic</option>
+          <option value="journalist">Journalist / Reporter</option>
+          <option value="policy">Policy Maker / Government</option>
+          <option value="founder">Founder / Entrepreneur</option>
+          <option value="investor">Investor / Funder</option>
+          <option value="advocate">Advocate / Nonprofit</option>
+          <option value="developer">Developer / Engineer</option>
+          <option value="other">Other</option>
+        </select>
+        <select class="waitlist-select" id="waitlist-state">
+          <option value="" disabled selected>My state...</option>
+          <option>Pennsylvania</option><option>Ohio</option><option>Indiana</option>
+          <option>New York</option><option>California</option><option>Texas</option>
+          <option>Illinois</option><option>Michigan</option><option>Massachusetts</option>
+          <option>Washington</option><option>National / All States</option><option>Other</option>
+        </select>
+      </div>
+      <button class="waitlist-btn" onclick="submitWaitlist()">Join the Waitlist</button>
+      <div class="waitlist-note">No spam. Notified only when your state's data is published or when API access opens. Unsubscribe anytime.</div>
+    </div>
+    <div class="waitlist-success" id="waitlist-success">
+      <div class="waitlist-success-text">You're on the list. We'll notify you when <span id="success-state">your state</span> goes live — and when Nomos API access opens.<br><br>In the meantime, the methodology and current dataset are open at <span>followthedollar.org</span>.</div>
+    </div>
+  </div>
+</section>
+<section class="byoai-section">
+  <div class="reveal">
+    <div class="byoai-eyebrow">New — AI Interrogation</div>
+    <h2 class="byoai-headline">Don't just read<br>the data.<br><span style="color: var(--red);">Interrogate it.</span></h2>
+    <p class="byoai-copy">Ask Claude anything about the verified dataset. Every answer is grounded in audited IRS filings, Federal Audit Clearinghouse data, and state budget documents. No hallucinations. No estimates. Primary sources only.</p>
+    <a href="interrogate.html" class="byoai-link">Launch Interrogation Interface →</a>
+  </div>
+  <div class="reveal">
+    <div class="byoai-card">
+      <div class="byoai-card-label">Example query</div>
+      <div class="byoai-query">"If Pennsylvania applied Elevate Ventures' DCR to Innovation Works' appropriations, how much additional capital would reach founders?"</div>
+      <div class="byoai-mini-label">Follow The Dollar AI</div>
+      <div class="byoai-answer">Elevate Ventures delivers <strong style="color: var(--red);">55¢</strong> per dollar vs Innovation Works' <strong style="color: var(--red);">25¢</strong>. On a $10M appropriation, that's a <strong style="color: var(--white);">$2.9M gap</strong> in capital that would reach founders under the Indiana model...</div>
+      <div class="byoai-foot">IRS 990 · FAC · State Budget · Primary Sources Only</div>
+    </div>
+  </div>
+</section>
+<div class="nomos-band" id="nomos">
+  <div class="nomos-left">
+    <div class="nomos-eyebrow">Powered by Nomos</div>
+    <div class="nomos-headline">The Commercial<br>Data Layer</div>
+    <p class="nomos-desc">Nomos provides API access to the full Direct Capital Ratio dataset — enabling researchers, journalists, policymakers, and oversight bodies to query, analyze, and monitor public dollar efficiency at scale.</p>
+  </div>
+  <a href="#waitlist" class="btn-white">Request API Access</a>
+</div>
+<footer>
+  <div class="footer-logo">Follow<span>The</span>Dollar</div>
+  <div class="footer-note">
+    All data sourced from IRS Form 990 public filings, Federal Audit Clearinghouse, and state budget documents.<br>
+    Methodology available on request. A Pittsburgh Compact initiative. Commercial API by Nomos.
+  </div>
+</footer>
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+  const bars = document.querySelectorAll('.ratio-fill');
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.width = entry.target.style.width;
+      }
+    });
+  }, { threshold: 0.3 });
+  bars.forEach(bar => {
+    const target = bar.style.width;
+    bar.style.width = '0%';
+    barObserver.observe(bar);
+    setTimeout(() => { bar.style.width = target; }, 300);
+  });
+  const TARGET_COUNT = 47;
+  const counterEl = document.getElementById('waitlist-counter');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        let count = 0;
+        const step = Math.ceil(TARGET_COUNT / 40);
+        const interval = setInterval(() => {
+          count = Math.min(count + step, TARGET_COUNT);
+          counterEl.textContent = count;
+          if (count >= TARGET_COUNT) clearInterval(interval);
+        }, 40);
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  counterObserver.observe(counterEl);
+  async function submitWaitlist() {
+    const email = document.getElementById('waitlist-email').value.trim();
+    const role = document.getElementById('waitlist-role').value;
+    const state = document.getElementById('waitlist-state').value;
+    const btn = document.querySelector('.waitlist-btn');
+    if (!email || !email.includes('@')) {
+      document.getElementById('waitlist-email').style.outline = '1px solid var(--red)';
+      document.getElementById('waitlist-email').focus();
+      return;
+    }
+    btn.textContent = 'Submitting...';
+    btn.style.opacity = '0.7';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/xaqapqdn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          email,
+          role: role || 'Not specified',
+          state: state || 'Not specified',
+          source: 'followthedollar.org waitlist'
+        })
+      });
+      if (res.ok) {
+        const stateLabel = state || 'your state';
+        document.getElementById('success-state').textContent = stateLabel;
+        document.getElementById('waitlist-form').style.display = 'none';
+        document.getElementById('waitlist-success').style.display = 'block';
+        counterEl.textContent = parseInt(counterEl.textContent, 10) + 1;
+      } else {
+        btn.textContent = 'Try Again';
+        btn.style.opacity = '1';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      btn.textContent = 'Try Again';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+    }
+  }
+  document.getElementById('waitlist-email').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitWaitlist();
+  });
+</script>
+</body>
+</html>    inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 1000;
